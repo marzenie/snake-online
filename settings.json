@@ -1,7 +1,7 @@
 {
-    "port": 4178,
-    "host": "test",
-    "password": "asd",
+    "port": "7123",
+    "host": "localhost",
+    "password": "asdx",
     "type": 1,
     "mode": 0,
     "title": "Snake-Terminal Online"
