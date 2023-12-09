@@ -3,5 +3,6 @@
   "host": "localhost",
   "password": "",
   "type": 0,
-  "mode": 0
+  "mode": 0,
+  "title": "Snake-Terminal Online"
 }
