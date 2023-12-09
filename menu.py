@@ -1,5 +1,6 @@
 import curses
 import json
+from functions.hash_str import hash_str
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 def draw_menu(stdscr):
@@ -79,7 +80,9 @@ def draw_menu(stdscr):
                         stdscr.addstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), " " * 30)
                         curses.echo()
                         res = stdscr.getstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), 30).decode('utf-8')
-                        if ((res != "") and (res != "***")):
+                        if ((option == "Password") and (res != "***")):
+                            settings[option.lower()] = hash_str(res)
+                        elif (res != ""):
                             settings[option.lower()] = res
                 else:
                     curses.noecho()
