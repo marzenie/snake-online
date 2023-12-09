@@ -36,7 +36,11 @@ def draw_menu(stdscr):
 
     stdscr.addstr(typ_y, typ_x, typ_label)
     stdscr.addstr(dane_y, dane_x, dane_label)
-    
+    max_y, max_x = stdscr.getmaxyx()
+    stdscr.addstr(curses.LINES - 4, 0, '⮞ Moving up or down - arrows ↑ or ↓', curses.color_pair(1))
+    stdscr.addstr(curses.LINES - 3, 0, '⮞ To confirm Space or enter', curses.color_pair(1))
+    stdscr.addstr(curses.LINES - 2, 0, '⮞ To switch TAB', curses.color_pair(1))
+    stdscr.addstr(curses.LINES - 1, 0, '⮞ To start typing, click the right arrow', curses.color_pair(1))
     for i, option in enumerate(dane_options):
         stdscr.addstr(dane_y + 2 + i, dane_x + indentation, option + ": ")
     
@@ -48,6 +52,7 @@ def draw_menu(stdscr):
     selected = "› "
     unselected = "  "
     test = ""
+    
     while True:
         if selected_label_type == 0: # Typ 
             for i, option in enumerate(typ_options):
@@ -61,6 +66,7 @@ def draw_menu(stdscr):
                 if i == selected_option_dane:
                     stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(selected), selected + option, curses.A_BOLD | curses.color_pair(2))
                     if key == curses.KEY_RIGHT:
+                        stdscr.addstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), " " * 30)
                         curses.echo()
                         test = stdscr.getstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), 30).decode('utf-8')
                 else:
@@ -77,15 +83,11 @@ def draw_menu(stdscr):
             selected_option_type += 1
         elif key == curses.KEY_UP and selected_option_type > 0 and selected_label_type == 0:
             selected_option_type -= 1
-        elif key in [32, 10] and selected_label_type == 0:  # 32 - space, 10 - enter
-            stdscr.addstr(9 + len(typ_options), 0, f"Typ: {typ_options[selected_option_type]}") #res print
             
         elif key == curses.KEY_DOWN and selected_option_dane < len(dane_options) - 1 and selected_label_type == 1:
             selected_option_dane += 1
         elif key == curses.KEY_UP and selected_option_dane > 0 and selected_label_type == 1:
             selected_option_dane -= 1
-        elif key in [32, 10] and selected_label_type == 1:  # 32 - space, 10 - enter
-            stdscr.addstr(10 + len(dane_options), 0, f"Dane: {test}" + " " * 30) #res print
             
             
     stdscr.refresh()
