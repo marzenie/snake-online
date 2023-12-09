@@ -1,7 +1,7 @@
 import curses
 import json
-
-settings = json.load(open('settings.json'))
+settings_file = 'settings.json'
+settings = json.load(open(settings_file))
 def draw_menu(stdscr):
 
     #colors
@@ -14,7 +14,7 @@ def draw_menu(stdscr):
 
     bi_cb_color = curses.color_pair(1) | curses.A_BOLD | curses.A_ITALIC # bold italic, cyan black
     
-    #title
+    # centered title
     stdscr.addstr(2, (curses.COLS - len(settings['title'])) // 2, settings['title'], bi_cb_color)
 
     #labels name
@@ -36,49 +36,70 @@ def draw_menu(stdscr):
 
     stdscr.addstr(typ_y, typ_x, typ_label)
     stdscr.addstr(dane_y, dane_x, dane_label)
+    
+    stdscr.addstr(13, (curses.COLS - len("START")) // 2, "START")
+    
     max_y, max_x = stdscr.getmaxyx()
+    #instruction
     stdscr.addstr(curses.LINES - 4, 0, '⮞ Moving up or down - arrows ↑ or ↓', curses.color_pair(1))
-    stdscr.addstr(curses.LINES - 3, 0, '⮞ To confirm Space or enter', curses.color_pair(1))
+    stdscr.addstr(curses.LINES - 3, 0, '⮞ To confirm Enter', curses.color_pair(1))
     stdscr.addstr(curses.LINES - 2, 0, '⮞ To switch TAB', curses.color_pair(1))
     stdscr.addstr(curses.LINES - 1, 0, '⮞ To start typing, click the right arrow', curses.color_pair(1))
+    
     for i, option in enumerate(dane_options):
-        stdscr.addstr(dane_y + 2 + i, dane_x + indentation, option + ": ")
+        if (option == "Password"):
+            stdscr.addstr(dane_y + 2 + i, dane_x + indentation, option + ": ")
+        else:
+            stdscr.addstr(dane_y + 2 + i, dane_x + indentation, option + ": " + str(settings[option.lower()]))
     
     selected_option_type = settings['type']
     selected_option_dane = 0
-    selected_option_password = ""
-    selected_label_type = 0  # 0 - "Typ", 1 - "Dane"
+    selected_label_type = 0  # 0 - "Typ", 1 - "Dane", 2 - "START"
     
     selected = "› "
     unselected = "  "
-    test = ""
     
     while True:
         if selected_label_type == 0: # Typ 
+            
             for i, option in enumerate(typ_options):
                 if i == selected_option_type:
                     stdscr.addstr(typ_y + 2 + i, typ_x + indentation - len(selected), selected + option, curses.A_BOLD | curses.color_pair(2))
+                    settings['type'] = i
                 else:
                     stdscr.addstr(typ_y + 2 + i, typ_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
                     
-        else:  # Dane selected
+        elif selected_label_type == 1:  # Dane selected
             for i, option in enumerate(dane_options):
                 if i == selected_option_dane:
                     stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(selected), selected + option, curses.A_BOLD | curses.color_pair(2))
                     if key == curses.KEY_RIGHT:
                         stdscr.addstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), " " * 30)
                         curses.echo()
-                        test = stdscr.getstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), 30).decode('utf-8')
+                        res = stdscr.getstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), 30).decode('utf-8')
+                        if (res != ""):
+                            settings[option.lower()] = res
                 else:
                     curses.noecho()
                     stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
-                    
-
+        else:  # START selected
+            stdscr.addstr(13, (curses.COLS - len("START") - len(selected)) // 2, selected + "START", curses.A_BOLD | curses.color_pair(2))
         stdscr.refresh()
         key = stdscr.getch()
         
         if key == 9:  # 9 - tab change label
-            selected_label_type = 1 - selected_label_type  # Toggle between 0 and 1
+            if selected_label_type == 0:
+                for i, option in enumerate(typ_options):
+                    stdscr.addstr(typ_y + 2 + i, typ_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
+            if selected_label_type == 1:
+                for i, option in enumerate(dane_options):
+                    stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
+            if selected_label_type == 2:
+                stdscr.addstr(13, (curses.COLS - len("START") - len(selected)) // 2, "START     ")
+                
+            selected_label_type = (selected_label_type + 1) % 3 # Toggle between 0 and 1 and 2
+            
+            
         elif key == curses.KEY_DOWN and selected_option_type < len(typ_options) - 1 and selected_label_type == 0:
             selected_option_type += 1
         elif key == curses.KEY_UP and selected_option_type > 0 and selected_label_type == 0:
@@ -88,8 +109,13 @@ def draw_menu(stdscr):
             selected_option_dane += 1
         elif key == curses.KEY_UP and selected_option_dane > 0 and selected_label_type == 1:
             selected_option_dane -= 1
-            
-            
+        elif key == 10 and selected_label_type == 2:
+            with open(settings_file, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, ensure_ascii=False, indent=4)
+                
+        elif key == curses.KEY_LEFT:
+            stdscr.addstr(9 + len(typ_options), 0, f"Typ: {settings}") #res printprint(settings)
+    
     stdscr.refresh()
     stdscr.getch()
     
