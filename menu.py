@@ -20,47 +20,74 @@ def draw_menu(stdscr):
     #labels name
     typ_label = "Typ:"
     dane_label = "Dane:"
-    host_label = "Host:"
-    port_label = "Port:"
-    password_label = "Password:"
-    
+  
     typ_options = ["Client", "Server"]
+    dane_options = ["Host", "Port", "Password"]
+    """
+    typ_y = Y for typ_label
+    dane_y = Y for dane_label
+    space = space between typ_label and dane_label
+    indentation = indentation of subcolumns
+    """
+    typ_y, dane_y, space, indentation = 6, 6, 14, 2
 
-    typ_y, dane_y, space = 6, 6, 14
     typ_x = (curses.COLS - len(typ_label) - len(dane_label) - space) // 2
     dane_x = typ_x + len(typ_label) + space
 
     stdscr.addstr(typ_y, typ_x, typ_label)
     stdscr.addstr(dane_y, dane_x, dane_label)
-    stdscr.addstr(dane_y + 2, dane_x + 2, host_label)
-    stdscr.addstr(dane_y + 3, dane_x + 2, port_label)
-    stdscr.addstr(dane_y + 4, dane_x + 2, password_label)
     
-    selected_option_type = 0
-    selected_option_host = ""
-    selected_option_port = ""
+    for i, option in enumerate(dane_options):
+        stdscr.addstr(dane_y + 2 + i, dane_x + indentation, option + ": ")
+    
+    selected_option_type = settings['type']
+    selected_option_dane = 0
     selected_option_password = ""
-
-
+    selected_label_type = 0  # 0 - "Typ", 1 - "Dane"
+    
+    selected = "› "
+    unselected = "  "
+    test = ""
     while True:
-        for i, option in enumerate(typ_options):
-            if i == selected_option_type:
-                stdscr.addstr(typ_y + 2 + i, typ_x, "› " + option, curses.A_BOLD | curses.color_pair(2))
-            else:
-                stdscr.addstr(typ_y + 2 + i, typ_x, "  " + option, curses.A_BOLD)
+        if selected_label_type == 0: # Typ 
+            for i, option in enumerate(typ_options):
+                if i == selected_option_type:
+                    stdscr.addstr(typ_y + 2 + i, typ_x + indentation - len(selected), selected + option, curses.A_BOLD | curses.color_pair(2))
+                else:
+                    stdscr.addstr(typ_y + 2 + i, typ_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
+                    
+        else:  # Dane selected
+            for i, option in enumerate(dane_options):
+                if i == selected_option_dane:
+                    stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(selected), selected + option, curses.A_BOLD | curses.color_pair(2))
+                    if key == curses.KEY_RIGHT:
+                        curses.echo()
+                        test = stdscr.getstr(dane_y + 2 + i, dane_x + indentation + len(selected) + len(option), 30).decode('utf-8')
+                else:
+                    curses.noecho()
+                    stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
+                    
 
         stdscr.refresh()
-
         key = stdscr.getch()
-
-        if key == curses.KEY_DOWN and selected_option_type < len(typ_options) - 1:
+        
+        if key == 9:  # 9 - tab change label
+            selected_label_type = 1 - selected_label_type  # Toggle between 0 and 1
+        elif key == curses.KEY_DOWN and selected_option_type < len(typ_options) - 1 and selected_label_type == 0:
             selected_option_type += 1
-        elif key == curses.KEY_UP and selected_option_type > 0:
+        elif key == curses.KEY_UP and selected_option_type > 0 and selected_label_type == 0:
             selected_option_type -= 1
-        elif key in [32, 10]: # 32 - space, 10 - enter
-            stdscr.addstr(9 + len(typ_options), 0, f"Typ: {typ_options[selected_option_type]}")
+        elif key in [32, 10] and selected_label_type == 0:  # 32 - space, 10 - enter
+            stdscr.addstr(9 + len(typ_options), 0, f"Typ: {typ_options[selected_option_type]}") #res print
             
-    
+        elif key == curses.KEY_DOWN and selected_option_dane < len(dane_options) - 1 and selected_label_type == 1:
+            selected_option_dane += 1
+        elif key == curses.KEY_UP and selected_option_dane > 0 and selected_label_type == 1:
+            selected_option_dane -= 1
+        elif key in [32, 10] and selected_label_type == 1:  # 32 - space, 10 - enter
+            stdscr.addstr(10 + len(dane_options), 0, f"Dane: {test}" + " " * 30) #res print
+            
+            
     stdscr.refresh()
     stdscr.getch()
     
