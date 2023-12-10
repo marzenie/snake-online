@@ -1,8 +1,10 @@
 import curses
 import json
 from functions.hash_str import hash_str
+
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
+    
 def draw_menu(stdscr):
 
     #colors
@@ -11,6 +13,7 @@ def draw_menu(stdscr):
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     
     curses.curs_set(0) # remove cursor
+    
     stdscr.clear()
 
     bi_cb_color = curses.color_pair(1) | curses.A_BOLD | curses.A_ITALIC # bold italic, cyan black
@@ -39,8 +42,8 @@ def draw_menu(stdscr):
     stdscr.addstr(dane_y, dane_x, dane_label)
     
     stdscr.addstr(13, (curses.COLS - len("START")) // 2, "START")
+   
     
-    max_y, max_x = stdscr.getmaxyx()
     #instruction
     stdscr.addstr(curses.LINES - 4, 0, '⮞ Moving up or down - arrows ↑ or ↓', curses.color_pair(1))
     stdscr.addstr(curses.LINES - 3, 0, '⮞ To confirm Enter', curses.color_pair(1))
@@ -56,13 +59,13 @@ def draw_menu(stdscr):
     
     selected_option_type = settings['type']
     selected_option_dane = 0
-    selected_label_type = 0  # 0 - "Typ", 1 - "Dane", 2 - "START"
+    selected_label_type  = 0  # 0 - "Typ", 1 - "Dane", 2 - "START"
     
-    selected = "› "
+    selected   = "› "
     unselected = "  "
     
     while True:
-    
+        
         if selected_label_type == 0: # Typ 
             
             for i, option in enumerate(typ_options): # deselecting/marking in type select
@@ -89,6 +92,7 @@ def draw_menu(stdscr):
                     stdscr.addstr(dane_y + 2 + i, dane_x + indentation - len(unselected), unselected + option, curses.A_BOLD)
         else:  # START selected
             stdscr.addstr(13, (curses.COLS - len("START") - len(selected) - 2) // 2, selected + "START", curses.A_BOLD | curses.color_pair(2))
+        
         stdscr.refresh()
         key = stdscr.getch()
         
@@ -116,12 +120,14 @@ def draw_menu(stdscr):
         elif key == 10 and selected_label_type == 2:
             with open(settings_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
-                
-        elif key == curses.KEY_LEFT:
-            stdscr.addstr(9 + len(typ_options), 0, f"Typ: {settings}") #res printprint(settings)
+            break;
+            
     
     stdscr.refresh()
+    stdscr.addstr(15 + len(typ_options), 0, f"Typ: {settings}")
+    
     stdscr.getch()
+    
     
 if __name__ == "__main__":
     curses.wrapper(draw_menu)
