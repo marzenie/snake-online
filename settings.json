@@ -1,7 +1,7 @@
 {
-    "port": "1111",
-    "host": "hjkgvhcjghgjhgjhjhghjhjhjghjgh",
-    "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "port": "8195",
+    "host": "localhost",
+    "password": "97c94ebe5d767a353b77f3c0ce2d429741f2e8c99473c3c150e2faa3d14c9da6",
     "type": 0,
     "mode": 0,
     "title": "Snake-Terminal Online"

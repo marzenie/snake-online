@@ -8,11 +8,11 @@ settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 
 
-def exit():
-    sys.exit(1)
+def exit1(stat=False):
+    sys.exit(stat)
 if sys.platform == "win32":
     import win32api
-    win32api.SetConsoleCtrlHandler(handler, True)
+    win32api.SetConsoleCtrlHandler(exit1, False)
 
 def draw_menu(stdscr):
 
