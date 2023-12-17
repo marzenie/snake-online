@@ -1,6 +1,7 @@
 import curses
 import json
 import sys
+import win32api
 from threading import Thread
 from functions.hash_str import hash_str
 from functions.run_socket import run_socket
