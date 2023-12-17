@@ -1,10 +1,19 @@
 import curses
 import json
+import sys
+from threading import Thread
 from functions.hash_str import hash_str
-
+from functions.run_socket import run_socket
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
-    
+
+
+def exit():
+    sys.exit(1)
+if sys.platform == "win32":
+    import win32api
+    win32api.SetConsoleCtrlHandler(handler, True)
+
 def draw_menu(stdscr):
 
     #colors
@@ -120,14 +129,25 @@ def draw_menu(stdscr):
         elif key == 10 and selected_label_type == 2:
             with open(settings_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
-            break;
+            break
+        
+    
+        
+    
             
-    
     stdscr.refresh()
-    stdscr.addstr(15 + len(typ_options), 0, f"Typ: {settings}")
-    
-    stdscr.getch()
+ 
     
     
 if __name__ == "__main__":
     curses.wrapper(draw_menu)
+    thread0 = Thread(target=run_socket)
+    thread0.daemon = True
+    thread0.start()
+    while True:
+        try:
+            exit_signal = input('Type "CTRL + C" anytime to stop program\n')
+        except KeyboardInterrupt:
+            print("\nGoodbyeee!")
+            sys.exit()
+            
