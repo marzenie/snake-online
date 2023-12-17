@@ -1,18 +1,12 @@
 import curses
 import json
 import sys
-import win32api
 from threading import Thread
 from functions.hash_str import hash_str
 from functions.run_socket import run_socket
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 
-
-def exit1(a, b=None):
-    sys.exit(1)
-if sys.platform == "win32":
-    win32api.SetConsoleCtrlHandler(exit1, True)
 
 def draw_menu(stdscr):
 
