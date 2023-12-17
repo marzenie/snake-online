@@ -150,4 +150,7 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("\nGoodbyeee!")
             sys.exit()
+        except EOFError:
+            print("\nGoodbyeee!")
+            sys.exit()
             
