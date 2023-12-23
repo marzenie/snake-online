@@ -3,7 +3,8 @@ import json
 import sys
 from threading import Thread
 from functions.hash_str import hash_str
-from functions.run_socket import run_socket
+from functions.socket import run_socket
+from functions.socket import connect_socket
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 
@@ -135,9 +136,14 @@ def draw_menu(stdscr):
     
 if __name__ == "__main__":
     curses.wrapper(draw_menu)
-    thread0 = Thread(target=run_socket)
-    thread0.daemon = True
-    thread0.start()
+    if (settings['type'] == 1):
+        thread0 = Thread(target=run_socket)
+        thread0.daemon = True
+        thread0.start()
+    else:
+        thread0 = Thread(target=connect_socket)
+        thread0.daemon = True
+        thread0.start()
     while True:
         try:
             exit_signal = input('Type "CTRL + C" anytime to stop program\n')

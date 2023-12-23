@@ -2,7 +2,7 @@ import curses
 import time
 import random
 random_next_time = random.randint(3, 6)
-
+cell_color = ""
 def window_setup():
     window = curses.initscr()
     curses.curs_set(0)
@@ -13,8 +13,9 @@ def window_setup():
     return w
     
 def check_collision(snake, window):
+    global cell_color
     #cell_ch = window.inch(snake[0], snake[1]) & curses.A_CHARTEXT
-    colors_array = [0, 67108864]
+    colors_array = [0, 67108864, 1024]
     cell_color = window.inch(snake[0], snake[1]) & curses.A_COLOR
     if cell_color in colors_array:
         return False
@@ -113,7 +114,7 @@ def main():
         tail = snake.pop()
         if draw_snake(snake, window) == "END":
             break
-           
+    
           
     time.sleep(2)
 if __name__ == "__main__":
