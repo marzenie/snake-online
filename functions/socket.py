@@ -2,6 +2,7 @@ import json
 import socket
 import threading
 FORMAT = 'UTF-8'
+HEADER = 64
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
 def handle_client(conn, addr):
@@ -51,4 +52,47 @@ def run_socket():
         thread.daemon = True
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+        
+        
+def send(client, msg):
+    message = msg.encode(FORMAT)
+    msg_length = len(message)
+    send_length = str(msg_length).encode(FORMAT)
+    send_length += b' ' * (HEADER - len(send_length))
+    client.send(send_length)
+    client.send(message)
+    print(client.recv(2048).decode(FORMAT))
+    
+def connect_socket():
+    settings_file = 'settings.json'
+    settings = json.load(open(settings_file))
+    
+    try:
+        port = int(settings['port'])
+    except:
+        print("[ERROR] Port must be number")
+        return 1
+        
 
+    try:
+        PORT = 8194
+        DISCONNECT_MESSAGE = "!DISCONNECT"
+        # Whatever IP address you found from running ifconfig in terminal.
+
+        ADDR = (settings['host'], port)
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Officially connecting to the server.
+        client.connect(ADDR)
+        
+
+    except OverflowError as oe:
+        print(f"[ERROR] Port number out of range: {oe}")
+        return 1
+    except Exception as e:
+        print("[ERROR] An exception occurred", e)
+        return 1
+        
+
+    send(client, "Hello World")
+        
+        
