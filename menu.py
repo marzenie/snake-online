@@ -5,6 +5,7 @@ from threading import Thread
 from functions.hash_str import hash_str
 from functions.socket import run_socket
 from functions.socket import connect_socket
+from functions.socket import send
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 
@@ -141,9 +142,7 @@ if __name__ == "__main__":
         thread0.daemon = True
         thread0.start()
     else:
-        thread0 = Thread(target=connect_socket)
-        thread0.daemon = True
-        thread0.start()
+        connect_socket("test")
     while True:
         try:
             exit_signal = input('Type "CTRL + C" anytime to stop program\n')
