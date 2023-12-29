@@ -91,7 +91,7 @@ def draw_snake(snake, window):
 
 
 
-def main():
+def start(stdscr):
     window = window_setup()
     sh, sw = window.getmaxyx()
     snake = [
@@ -114,8 +114,8 @@ def main():
         tail = snake.pop()
         if draw_snake(snake, window) == "END":
             break
-    
-          
     time.sleep(2)
+    stdscr.refresh()
+       
 if __name__ == "__main__":
-    main()
+    curses.wrapper(start)

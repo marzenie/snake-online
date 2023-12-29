@@ -1,11 +1,12 @@
 import curses
 import json
 import sys
-from threading import Thread
-from functions.hash_str import hash_str
-from functions.socket import run_socket
-from functions.socket import connect_socket
-from functions.socket import send
+import threading
+import queue
+from functions.extensions import hash_str
+from functions.server import start_server
+from functions.client import game
+#from functions.socket import Client_socket
 settings_file = 'settings.json'
 settings = json.load(open(settings_file))
 
@@ -31,7 +32,7 @@ def draw_menu(stdscr):
     dane_label = "Dane:"
   
     typ_options = ["Client", "Server"]
-    dane_options = ["Host", "Port", "Password"]
+    dane_options = ["Host", "Port", "Name", "Password"]
     """
     typ_y = Y for typ_label
     dane_y = Y for dane_label
@@ -132,21 +133,39 @@ def draw_menu(stdscr):
     
             
     stdscr.refresh()
- 
+    curses.curs_set(0)
+    stdscr.clear()
     
     
 if __name__ == "__main__":
     curses.wrapper(draw_menu)
-    if (settings['type'] == 1):
-        thread0 = Thread(target=run_socket)
-        thread0.daemon = True
-        thread0.start()
-    else:
-        connect_socket("test")
+
+
+    error_server = None
+    
+    if settings['type'] == 1:
+        message_queue = queue.Queue()
+        server = threading.Thread(target=start_server, args=(message_queue,))
+        server.daemon = True
+        server.start()
+        
+        while True:
+            error_server = message_queue.get()
+            if error_server is not None:
+                break
+                
+    if error_server is not None and error_server.get('error', False):
+        print(error_server['desc'])
+        sys.exit()
+        
+    res = curses.wrapper(game)
+    
+    if (res['error'] == True):
+        print(res['desc'])
+        sys.exit()
     while True:
         try:
             exit_signal = input('Type "CTRL + C" anytime to stop program\n')
         except KeyboardInterrupt:
             print("\nGoodbyeee!")
             sys.exit()
-            
