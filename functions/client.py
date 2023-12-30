@@ -4,6 +4,7 @@ import curses
 import threading
 import sys
 import time
+import random
 from functions.extensions import split_jsons
 
 class SnakeGameClient:
@@ -15,7 +16,8 @@ class SnakeGameClient:
         self.key           = curses.KEY_RIGHT
         self.error         = {"error": False, "desc": ""}
         self.login_pass    = {"name": self.settings['name'], "password": self.settings['password']}
-        self.colors        = ["COLOR_RED", "COLOR_GREEN", "COLOR_BLUE", "COLOR_MAGENTA", "COLOR_CYAN" , "COLOR_WHITE"]
+        self.colors        = ["COLOR_RED", "COLOR_GREEN", "COLOR_BLUE", "COLOR_MAGENTA", "COLOR_CYAN", "COLOR_WHITE", "COLOR_BLACK"]
+        self.random_next_time = random.randint(3, 13) 
         
         for index, color in enumerate(self.colors):
             curses.init_pair(index+1, curses.COLOR_BLACK, getattr(curses, color))
@@ -66,7 +68,8 @@ class SnakeGameClient:
             except ConnectionResetError:
                 print("Connection was reset. Exiting.")
                 sys.exit(1)
-                  
+                
+        self.stdscr.clear()          
         while True:
             self.handle_input()
             self.send_game_state()
@@ -100,7 +103,9 @@ class SnakeGameClient:
         
     def send(self, message):
         self.sock.send(message.encode())
+        
 
+    
     def receive_game_state(self):
         def get_update(self, msg):
             if msg:
@@ -125,11 +130,25 @@ class SnakeGameClient:
                 for json_str in split_js:
                     get_update(self, json_str)
 
-
-    def update_display(self):
-    
-        self.stdscr.clear()
+    def check_collision(self, snake):
+        #cell_ch = window.inch(snake[0], snake[1]) & curses.A_CHARTEXT
+        colors_array = [0, 67108864, 1024, 1792]
+        cell_color = self.stdscr.inch(snake[0], snake[1]) & curses.A_COLOR
+        if cell_color in colors_array:
+            return False
+        return True
         
+    def empty_space(self):
+        if self.random_next_time == 1:
+            if 1 == random.randint(0, 1):
+                return False
+            self.random_next_time  = random.randint(31, 94)
+            return True
+        self.random_next_time  -= 1
+        return False
+    
+    def update_display(self):
+        empty_spc = self.empty_space()
         for key in self.game_state.keys():
             if key == "update":
                 continue
@@ -138,11 +157,15 @@ class SnakeGameClient:
             for i, (y, x) in enumerate(snake):
                 if i == 0:
                     yx = [y, x]
-                    self.stdscr.addch(y, x, '•', curses.color_pair(6))
-                    
+                    if (self.check_collision(yx) == True and (empty_spc == False)):
+                            # server end com & koniec do spania dla pana
+                            sys.exit(1)
+                    else:
+                        self.stdscr.addch(y, x, '•', curses.color_pair(6))
                 elif i == 1:
-
-                    if (snake[2][0] == snake[1][0]) and (snake[0][0] > snake[1][0]): #lewo dół, prawo dół
+                    if (empty_spc == True):
+                        self.stdscr.addch(y, x, ' ', curses.color_pair(7))
+                    elif (snake[2][0] == snake[1][0]) and (snake[0][0] > snake[1][0]): #lewo dół, prawo dół
                         if (snake[2][1] < snake[1][1]):
                             self.stdscr.addch(y, x, '┓', curses.color_pair(int(key)+1))
                         else:
@@ -171,9 +194,6 @@ class SnakeGameClient:
                     elif snake[1][1] == snake[0][1]:
                         self.stdscr.addch(y, x, '┃', curses.color_pair(int(key)+1)) #━┃┏┓┗┛
                     
-        self.stdscr.refresh()
-
-
 def game(stdscr):
     # Curses initialization
     curses.curs_set(0)
