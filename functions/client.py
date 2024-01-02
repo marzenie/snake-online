@@ -64,14 +64,6 @@ class SnakeGameClient:
                     
                     if key == ord('R'):
                         self.send(json.dumps({"start": True, "token": self.token}))
-                        self.no_start_game = False
-                else:
-                    try:
-                        message = json.loads(self.sock.recv(self.settings['header']).decode())
-                    except:
-                        continue
-                    if message.get('join') == True:
-                        print(message['desc'])
             except ConnectionResetError:
                 print("Connection was reset. Exiting.")
                 sys.exit(1)
@@ -121,6 +113,8 @@ class SnakeGameClient:
                         if key == "update":
                             continue
                         self.game_state[key] = msg.get(key)
+                if ((msg.get('join') == True) and (self.no_start_game == True)):
+                    print(msg['desc'])
                 if msg.get('start') == True:
                     self.no_start_game = False
         while True:
